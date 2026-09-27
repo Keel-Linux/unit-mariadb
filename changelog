@@ -1,0 +1,25 @@
+unit-mariadb-1.0.0 (1) keel; urgency=low
+
+  * The MariaDB component, extracted from the shared tree as a fab unit
+    (decision 0010): the plan of plans/turnkey/mysql, the overlay of
+    overlays/mysql and the conf script of conf/mysql, consumed through
+    unit.d by every recipe that carries a MariaDB server.
+
+  * The conf script is the one file that differs from the shared tree, in
+    three lines: TKL_BASHLIB, BIN and INITD are overridable defaults, so
+    the script can be run against scratch directories and measured. A build
+    sets none of them and runs what the shared tree ran. The script does not
+    ship: fab copies it into the chroot, runs it and removes it.
+
+  * CONF_VARS += MYSQL_PASS of mk/turnkey/mysql.mk is deliberately not
+    carried. fab lets a unit name the build time variables its conf script
+    reads in a conf-vars file, and this conf script reads none: the variable
+    was written in that one line and read nowhere in the shared tree or in
+    keel-mariadb, where the password comes from the instance description at
+    first boot. A dead interface is not extracted.
+
+  * COMMON_REMOVELISTS += mysql is not carried either: removelists/mysql is
+    0 bytes. fab applies a unit's removelist after its conf script, so a
+    component that needs one can have one; this one does not.
+
+ -- Keel Linux maintainers <admin@keellinux.org>  Sun, 27 Sep 2026 09:30:00 +0000

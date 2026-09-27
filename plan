@@ -1,0 +1,13 @@
+/* The MariaDB component, resolved together with the recipe's own plan
+   (share/product.mk, root.spec). Extracted verbatim from
+   plans/turnkey/mysql of the shared tree.
+
+   default-mysql-server is MariaDB on Debian 13; python3-pymysql is what
+   bin/mysqlconf.py of the overlay imports; webmin-mysql puts the database
+   in the Webmin panel core already carries. A client is not here on
+   purpose: a recipe that talks to its own database asks for one, and
+   keel-mariadb does. */
+
+default-mysql-server
+python3-pymysql
+webmin-mysql
