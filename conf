@@ -1,0 +1,51 @@
+#!/bin/bash -e
+# Build time configuration of the MariaDB component, run by fab inside the
+# chroot after the overlay is applied (share/product.mk, "run the unit
+# configuration scripts"). It runs once per image: a layer built on a parent
+# that already carries this unit does not run it again, which is what
+# bt-layer's units field in the layer manifest is for.
+#
+# Extracted from conf/mysql of the shared tree. The only change is that the
+# three absolute paths below are overridable defaults, so the script can be
+# run against scratch directories and measured (decision 0004). Nothing sets
+# them in a build, so a build runs exactly what the shared tree ran.
+
+TKL_BASHLIB="${TKL_BASHLIB:-/usr/local/src/tkl-bashlib}"
+BIN="${BIN:-/usr/local/bin}"
+INITD="${INITD:-/etc/init.d}"
+
+. "$TKL_BASHLIB/init.sh"
+
+# Install mysqltuner at "latest" tag (via gh_releases) and from core dev's
+# repo[1] - rather than separate "org" repo[2]
+#
+# [1] https://github.com/jmrenouard/MySQLTuner-perl
+# [2] https://github.com/major/MySQLTuner-perl
+VERSION=master
+REPO="jmrenouard/MySQLTuner-perl"
+URL="https://raw.githubusercontent.com/$REPO/refs/heads/$VERSION"
+dl "$URL/mysqltuner.pl" $BIN
+mv "$BIN/mysqltuner.pl" $BIN/mysqltuner
+chmod +x "$BIN/mysqltuner"
+dl "$URL/basic_passwords.txt" $BIN
+dl "$URL/vulnerabilities.csv" $BIN
+
+# As of Debian Buster, there is no longer a /etc/init.d/mysql script, so let's
+# link the mariadb one.
+ln -s "$INITD/mariadb" "$INITD/mysql"
+
+# secure mysql installation
+service mysql start
+mysql <<EOF
+USE mysql;
+# remove anonymous users
+DELETE FROM user WHERE User='';
+
+# remove remote root
+DELETE FROM user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+
+# remove test database
+DROP DATABASE IF EXISTS test;
+DELETE FROM db WHERE Db='test' OR Db='test\\_%';
+EOF
+service mysql stop
