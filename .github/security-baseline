@@ -1,0 +1,7 @@
+# Security scan baseline (keel-linux/.github, security-scan.yml): findings
+# that were read and are not a risk, one per line, the fingerprint and why.
+shellcheck:SC2034:overlay/usr/local/bin/turnkey-mysql-install-perf-info-schemas:012cb66ac465 shell lint, not a security risk: a variable read by a sourcing script or left unused
+shellcheck:SC2145:overlay/usr/local/bin/turnkey-mysql-install-perf-info-schemas:9fac417dfd02 shell lint, not a security risk: "$@" mixed into a message string, affects only log text
+shellcheck:SC2145:overlay/usr/local/bin/turnkey-mysql-install-perf-info-schemas:c6853f6a46c6 shell lint, not a security risk: "$@" mixed into a message string, affects only log text
+shellcheck:SC2145:overlay/usr/local/bin/turnkey-mysql-install-perf-info-schemas:fa6e746708b3 shell lint, not a security risk: "$@" mixed into a message string, affects only log text
+shellcheck:SC2157:overlay/usr/local/bin/turnkey-mysql-install-perf-info-schemas:f272c4cbb56f shell lint, not a security risk: always-true test, so the cleanup of the build tree never runs (a correctness defect)
