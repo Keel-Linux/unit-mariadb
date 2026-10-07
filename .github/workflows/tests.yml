@@ -19,8 +19,8 @@ permissions:
 
 jobs:
   tests:
-    # COVERAGE.md: conf at 100 percent (16/16) and the cron job at 100
-    # percent (1/1), 20 bats tests. The threshold is the measured number and
+    # COVERAGE.md: conf at 100 percent (5/5) and the cron job at 100
+    # percent (1/1), 19 bats tests. The threshold is the measured number and
     # is only ever raised (decision 0006). This job produces the check
     # "tests / coverage", the required status on main; the job id is part of
     # that name, so renaming it silently detaches the protection rule.

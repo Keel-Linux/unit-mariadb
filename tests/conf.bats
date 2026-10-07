@@ -1,8 +1,10 @@
 #!/usr/bin/env bats
 # The build time conf script of the component, run for real against scratch
-# directories. Nothing here needs root, a database or a network: tkl-bashlib
-# is a stub whose dl() writes the file it is asked for, and service and mysql
-# are PATH stubs that record what they were called with.
+# directories. Nothing here needs root, a database or a network: service and
+# mysql are PATH stubs that record what they were called with, and tkl-bashlib
+# is a stub whose dl() records a call, kept so a download that came back
+# would be seen. mysqltuner is Debian's package since 1.0.1 and the script
+# fetches nothing.
 #
 # What these tests are about is the component's contract with the build:
 # every line of the script runs once per image, it stops at the first failure
@@ -51,19 +53,27 @@ EOF
     export PATH="$BATS_TEST_TMPDIR/stubs:$PATH"
 }
 
-@test "downloads mysqltuner and its two data files into BIN" {
+@test "downloads nothing: mysqltuner is Debian's package, from the plan" {
     run "$unit/conf"
     [ "$status" -eq 0 ]
-    [ -x "$BIN/mysqltuner" ]
-    [ ! -e "$BIN/mysqltuner.pl" ]
-    [ -f "$BIN/basic_passwords.txt" ]
-    [ -f "$BIN/vulnerabilities.csv" ]
+    run grep '^dl ' "$CALLS"
+    [ "$status" -eq 1 ]
+    [ -z "$(ls -A "$BIN")" ]
 }
 
-@test "takes mysqltuner from the maintained repository, at master" {
+@test "fetches nothing from the network at build time" {
+    # Comments are left out so the reason can still be written down. Every
+    # file the image gets from this component comes through apt, which
+    # verifies it, or from the overlay, which is in this repository.
+    run bash -c "sed 's/^[[:space:]]*#.*//' '$unit/conf' \
+        | grep -En 'https?://|(^|[^[:alnum:]_])(dl|curl|wget|gh_releases)([^[:alnum:]_]|$)'"
+    [ "$status" -eq 1 ]
+}
+
+@test "does not need tkl-bashlib, whose only use was the download" {
+    rm -f "$TKL_BASHLIB/init.sh"
     run "$unit/conf"
     [ "$status" -eq 0 ]
-    grep -q 'jmrenouard/MySQLTuner-perl/refs/heads/master/mysqltuner.pl' "$CALLS"
 }
 
 @test "links the init script Debian no longer ships" {
@@ -76,10 +86,10 @@ EOF
     run "$unit/conf"
     [ "$status" -eq 0 ]
     mapfile -t calls < "$CALLS"
-    [ "${calls[3]}" = "service mysql start" ]
-    [[ "${calls[4]}" == mysql* ]]
-    [ "${calls[5]}" = "service mysql stop" ]
-    [ "${#calls[@]}" -eq 6 ]
+    [ "${calls[0]}" = "service mysql start" ]
+    [[ "${calls[1]}" == mysql* ]]
+    [ "${calls[2]}" = "service mysql stop" ]
+    [ "${#calls[@]}" -eq 3 ]
 }
 
 @test "removes the anonymous users, the remote root and the test database" {
@@ -96,13 +106,6 @@ EOF
     [ "$status" -eq 0 ]
     grep -q "'::1'" "$SQL"
     grep -q "'127.0.0.1'" "$SQL"
-}
-
-@test "stops at a failed download and configures nothing" {
-    DL_FAIL=1 run "$unit/conf"
-    [ "$status" -ne 0 ]
-    [ ! -e "$INITD/mysql" ]
-    [ ! -s "$SQL" ]
 }
 
 @test "fails when the server does not start" {
@@ -123,10 +126,4 @@ EOF
     run "$unit/conf"
     [ "$status" -ne 0 ]
     [[ "$output" == *"File exists"* ]]
-}
-
-@test "fails when tkl-bashlib is not there" {
-    rm -f "$TKL_BASHLIB/init.sh"
-    run "$unit/conf"
-    [ "$status" -ne 0 ]
 }
