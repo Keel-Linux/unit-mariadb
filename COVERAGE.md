@@ -6,24 +6,24 @@ component is the layer that consumes it: `keel-mariadb` builds it, boots it
 in LXC and proves the database answers, which is why this repository does not
 carry a boot test of its own.
 
-## Measured 2026-09-27
+## Measured 2026-10-07
 
 | File | Test | Lines | Note |
 | --- | --- | --- | --- |
-| conf | tests/conf.bats (11 tests) | 100 percent (16/16) under kcov | every line and every failure path: the three downloads, the init script symlink, the start and stop around the SQL, a failed download, a server that does not start, a server that refuses the SQL, a missing tkl-bashlib, and a second run over the same tree |
+| conf | tests/conf.bats (10 tests) | 100 percent (5/5) under kcov | every line and every failure path: no download and nothing fetched from the network, no need for tkl-bashlib, the init script symlink, the start and stop around the SQL, a server that does not start, a server that refuses the SQL, and a second run over the same tree |
 | overlay/etc/cron.daily/mysqloptimize | tests/overlay.bats (3 tests) | 100 percent (1/1) under kcov | the command it runs, the exit code it returns, and the mode it ships with |
 | overlay/usr/local/bin/turnkey-mysql-install-perf-info-schemas | none | 0 | see below |
 | overlay/usr/lib/inithooks/bin/mysqlconf.py | none | 0 | see below |
 | overlay/usr/lib/confconsole/plugins.d/System_Settings/Mysql_perf_info.py | none | 0 | see below |
 
-Total over the two measured files: **100 percent (17/17)**, 20 bats tests over three files (conf, overlay, unit shape).
+Total over the two measured files: **100 percent (6/6)**, 19 bats tests over three files (conf, overlay, unit shape).
 `tests/coverage.sh` fails below `COVERAGE_THRESHOLD`, which the workflow sets
 to 100, the measured number. It is only ever raised (decision 0006).
 
     $ COVERAGE_THRESHOLD=100 tests/coverage.sh
     kcov line coverage (threshold 100 percent):
      100.00  1/1  mysqloptimize
-     100.00  16/16  conf
+     100.00  5/5  conf
 
 ## What is not measured, and what would change that
 

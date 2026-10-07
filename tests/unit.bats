@@ -16,10 +16,11 @@ setup() {
     [ -x "$unit/conf" ]
 }
 
-@test "the plan is there and names the three packages of the component" {
+@test "the plan is there and names the four packages of the component" {
     [ -f "$unit/plan" ]
     run grep -c '^[a-z0-9]' "$unit/plan"
-    [ "$output" = "3" ]
+    [ "$output" = "4" ]
+    grep -qx 'mysqltuner' "$unit/plan"
     grep -qx 'default-mysql-server' "$unit/plan"
     grep -qx 'python3-pymysql' "$unit/plan"
     grep -qx 'webmin-mysql' "$unit/plan"

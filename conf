@@ -5,30 +5,21 @@
 # that already carries this unit does not run it again, which is what
 # bt-layer's units field in the layer manifest is for.
 #
-# Extracted from conf/mysql of the shared tree. The only change is that the
-# three absolute paths below are overridable defaults, so the script can be
-# run against scratch directories and measured (decision 0004). Nothing sets
-# them in a build, so a build runs exactly what the shared tree ran.
-
-TKL_BASHLIB="${TKL_BASHLIB:-/usr/local/src/tkl-bashlib}"
-BIN="${BIN:-/usr/local/bin}"
-INITD="${INITD:-/etc/init.d}"
-
-. "$TKL_BASHLIB/init.sh"
-
-# Install mysqltuner at "latest" tag (via gh_releases) and from core dev's
-# repo[1] - rather than separate "org" repo[2]
+# Extracted from conf/mysql of the shared tree. Two changes, both named in
+# the changelog: the init script directory below is an overridable default,
+# so the script can be run against scratch directories and measured
+# (decision 0004), and mysqltuner is no longer downloaded here.
 #
-# [1] https://github.com/jmrenouard/MySQLTuner-perl
-# [2] https://github.com/major/MySQLTuner-perl
-VERSION=master
-REPO="jmrenouard/MySQLTuner-perl"
-URL="https://raw.githubusercontent.com/$REPO/refs/heads/$VERSION"
-dl "$URL/mysqltuner.pl" $BIN
-mv "$BIN/mysqltuner.pl" $BIN/mysqltuner
-chmod +x "$BIN/mysqltuner"
-dl "$URL/basic_passwords.txt" $BIN
-dl "$URL/vulnerabilities.csv" $BIN
+# The shared tree fetched mysqltuner.pl, basic_passwords.txt and
+# vulnerabilities.csv from the master branch of jmrenouard/MySQLTuner-perl
+# into /usr/local/bin: whatever that branch held on the day of the build,
+# with nothing pinned and nothing checked. Debian trixie packages it
+# (mysqltuner 2.6.0), so it is in the plan now and apt verifies it like
+# every other package. The package installs /usr/bin/mysqltuner and keeps
+# the two data files in /usr/share/mysqltuner, where it looks for them.
+# tests/conf.bats fails if this script fetches anything again.
+
+INITD="${INITD:-/etc/init.d}"
 
 # As of Debian Buster, there is no longer a /etc/init.d/mysql script, so let's
 # link the mariadb one.

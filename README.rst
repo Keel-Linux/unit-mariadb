@@ -35,9 +35,11 @@ What it carries
 ======================  =====================================================
 File                    Origin in the shared tree
 ======================  =====================================================
-``plan``                ``plans/turnkey/mysql``
+``plan``                ``plans/turnkey/mysql``, plus Debian's ``mysqltuner``
+                        (1.0.1)
 ``overlay/``            ``overlays/mysql`` (5 files, byte identical)
-``conf``                ``conf/mysql``, with three overridable defaults
+``conf``                ``conf/mysql``, with an overridable init script
+                        directory and without the mysqltuner download (1.0.1)
 ``version``             the pin ``bt-layer`` records in the layer manifest
 ======================  =====================================================
 
@@ -89,15 +91,30 @@ the common removelists, the product overlay and the product's own
   ``ROOT_OVERLAY``, so a recipe file still wins over a component file. No
   path of this overlay is a path of ``keel-mariadb``'s overlay, so nothing
   depends on it here.
-- The conf script needs ``/usr/local/src/tkl-bashlib`` and
-  ``/usr/local/bin/service``, which ``removelists-final`` of the shared tree
-  removes. Units run well before that, so the script has both.
+- The conf script needs ``/usr/local/bin/service``, which
+  ``removelists-final`` of the shared tree removes. Units run well before
+  that, so the script has it. It no longer needs
+  ``/usr/local/src/tkl-bashlib``, whose ``dl`` was its only use.
+
+mysqltuner comes from Debian
+----------------------------
+
+``conf/mysql`` of the shared tree downloaded ``mysqltuner.pl``,
+``basic_passwords.txt`` and ``vulnerabilities.csv`` from the ``master`` branch
+of ``jmrenouard/MySQLTuner-perl`` into ``/usr/local/bin``: unpinned and
+unchecked, so two builds of the same commit could ship different code, and
+nothing would notice code that was not what upstream published. Debian trixie
+packages it (``mysqltuner`` 2.6.0), so since 1.0.1 it is in the plan and apt
+verifies it. The package installs ``/usr/bin/mysqltuner`` and keeps the two
+data files in ``/usr/share/mysqltuner``, where the script looks for them.
+``tests/conf.bats`` fails if the conf script fetches anything from the
+network again.
 
 Known upstream defects, kept as they are
 ----------------------------------------
 
-The extraction changes nothing the image gets, so two upstream defects came
-across untouched. Both belong upstream (decision 0008) rather than in a
+The extraction changed nothing else the image gets, so two upstream defects
+came across untouched. Both belong upstream (decision 0008) rather than in a
 fork's overlay:
 
 - ``etc/cron.daily/mysqloptimize`` is not executable, so ``run-parts`` has

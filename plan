@@ -4,10 +4,13 @@
 
    default-mysql-server is MariaDB on Debian 13; python3-pymysql is what
    bin/mysqlconf.py of the overlay imports; webmin-mysql puts the database
-   in the Webmin panel core already carries. A client is not here on
+   in the Webmin panel core already carries; mysqltuner is Debian's package
+   of the tuning script the shared tree's conf/mysql downloaded from an
+   unpinned branch (unit-mariadb 1.0.1). A client is not here on
    purpose: a recipe that talks to its own database asks for one, and
    keel-mariadb does. */
 
 default-mysql-server
 python3-pymysql
 webmin-mysql
+mysqltuner

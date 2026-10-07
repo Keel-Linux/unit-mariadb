@@ -6,9 +6,9 @@
 Three files, three jobs:
 
 - `conf.bats` runs the build time conf script for real against scratch
-  directories. `tkl-bashlib` is a stub whose `dl()` writes the file it is
-  asked for; `service` and `mysql` are PATH stubs that record their calls and
-  can be made to fail. Nothing needs root, a database or a network.
+  directories. `service` and `mysql` are PATH stubs that record their calls
+  and can be made to fail; a `tkl-bashlib` stub records any `dl()`, and the
+  tests prove the script makes none and fetches nothing. Nothing needs root, a database or a network.
 - `overlay.bats` covers the daily cron job the overlay ships, with a PATH
   stub, and records the mode it ships with.
 - `unit.bats` checks the shape `fab` and `bt-layer` require of a unit, so a

@@ -1,3 +1,27 @@
+unit-mariadb-1.0.1 (1) keel; urgency=low
+
+  * mysqltuner is Debian's package, named in the plan, and the conf script
+    downloads nothing. conf/mysql of the shared tree fetched mysqltuner.pl,
+    basic_passwords.txt and vulnerabilities.csv from the master branch of
+    jmrenouard/MySQLTuner-perl into /usr/local/bin, unpinned and unchecked,
+    so the image carried whatever that branch held on the day of the build
+    and a script running as root on the appliance was never verified.
+    Debian trixie packages it (mysqltuner 2.6.0-1), so apt verifies it like
+    every other package. It installs /usr/bin/mysqltuner and keeps the two
+    data files in /usr/share/mysqltuner, where the script looks for them;
+    /usr/local/bin no longer holds any of the three. Found by the
+    2026-10-03 audit of the data service layers.
+
+  * The conf script no longer sources tkl-bashlib, whose dl was its only
+    use, and TKL_BASHLIB and BIN are gone from its overridable defaults.
+    INITD stays.
+
+  * tests/conf.bats fails if the conf script fetches anything from the
+    network (a URL, dl, curl, wget or gh_releases outside a comment), and
+    tests/unit.bats requires mysqltuner in the plan.
+
+ -- Marcos Mendez <mendez.foto@gmail.com>  Wed, 07 Oct 2026 12:00:00 +0000
+
 unit-mariadb-1.0.0 (1) keel; urgency=low
 
   * The MariaDB component, extracted from the shared tree as a fab unit
