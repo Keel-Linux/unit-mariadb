@@ -22,7 +22,7 @@ done
 report="${COVERAGE_DIR:-$(mktemp -d)}"
 # The include pattern is the whitelist. Both entries end in a file name, so
 # no directory of the scratch trees the tests build can match them.
-kcov --include-pattern=/unit-mariadb/conf,/cron.daily/mysqloptimize \
+kcov --include-pattern="${here%/tests}/conf,/cron.daily/mysqloptimize" \
     "$report" bats "$here"
 
 json="$(find "$report" -mindepth 2 -maxdepth 2 -name coverage.json -not -path "*/kcov-merged/*" | head -1)"
